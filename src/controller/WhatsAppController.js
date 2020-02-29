@@ -202,7 +202,13 @@ export class WhatsAppController{
 
         //event button check para salvar o nome
         this.el.btnSavePanelEditProfile.on('click', e=>{
-            console.log(this.el.inputNamePanelEditProfile.innerHTML);
+
+            this.el.btnSavePanelEditProfile.disabled = true;
+            this._user.name = this.el.inputNamePanelEditProfile.innerHTML;
+            this._user.save().then(()=>{
+                this.el.btnSavePanelEditProfile.disabled = false;
+            });
+
         });        
 
         this.el.formPanelAddContact.on('submit', e=>{
@@ -210,6 +216,22 @@ export class WhatsAppController{
 
             //Cria um objeto com os campos existente no fomulario
             let formData = new FormData(this.el.formPanelAddContact);
+
+            let contact = new User(formData.get('email'));
+
+            contact.on('datachange', data=>{
+                if(data.name){
+                    this._user.addContact(contact).then(()=>{
+
+                        this.el.btnClosePanelAddContact.click();
+                        console.info('Contado Inserido!');
+                    });
+                }else{
+                    console.error('Usuario não encontrado!');
+                }
+            });
+
+            
         });
 
         //event de click para a lisa de contatos
