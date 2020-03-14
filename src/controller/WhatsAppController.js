@@ -1,9 +1,10 @@
-import { User } from '../model/User.js';
+import { User } from './../model/User.js';
 import {Format} from './../util/Format.js';
 import {Firebase} from './../util/Firebase';
 import {CameraController} from './CameraController.js';
 import {MicrophoneController} from './MicrophoneController.js';
 import {DocumentPreviewController} from './DocumentPreviewController.js';
+import { Chat } from './../model/Chat.js';
 
 
 
@@ -313,11 +314,22 @@ export class WhatsAppController{
 
             contact.on('datachange', data=>{
                 if(data.name){
-                    this._user.addContact(contact).then(()=>{
 
-                        this.el.btnClosePanelAddContact.click();
-                        console.info('Contado Inserido!');
+                    Chat.createIfNotExist(this._user.email,contact.email).then((chat)=>{
+
+                        contact.chatId = chat.id;
+                        this._user.chatId = chat.id;
+                        contact.addContact(this._user);
+
+
+                        this._user.addContact(contact).then(()=>{
+
+                            this.el.btnClosePanelAddContact.click();
+                            console.info('Contado Inserido!');
+                        });
                     });
+
+                    
                 }else{
                     console.error('Usuario não encontrado!');
                 }
