@@ -64,6 +64,6 @@ export class Firebase{
 
     //retorna a instancia do storage onde estara guardado os uploads
     static hd(){
-        return firestore.storage();
+        return firebase.storage();
     }
 }

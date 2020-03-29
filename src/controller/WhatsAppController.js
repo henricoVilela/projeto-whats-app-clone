@@ -170,18 +170,30 @@ export class WhatsAppController{
             docs.forEach(doc=>{
                 let data = doc.data();
                 data.id  = doc.id;
+                let message = new Message();
+                message.fromJSON(data);
 
+                //É minha a msg?
+                let me = (data.from === this._user.email);
 
+                //Se a mensagem ja esta na tela nao tem necessidade de redenrizar ela novamente
                 if(!this.el.panelMessagesContainer.querySelector('#_'+data.id)){
 
-                    
+                    if(!me){
+                        doc.ref.set({
+                            status: 'read'
+                        },{
+                            merge:true
+                        });
+                    }
 
-                    let message = new Message();
-                    message.fromJSON(data);
-                    let me = (data.from === this._user.email);
                     let view = message.getViewElement(me);
                     this.el.panelMessagesContainer.appendChild(view);
 
+                }else if(me){
+                    let msgEl = this.el.panelMessagesContainer.querySelector('#_'+data.id);
+                    msgEl.querySelector('.message-status').innerHTML = message.getStatusViewElement().outerHTML;
+                   
                 }
 
                
@@ -292,6 +304,17 @@ export class WhatsAppController{
     initEvents(){
         //usando os metodos criado em Element.prototype
         
+        this.el.inputSearchContacts.on('keyup', e=>{
+           if ( this.el.inputSearchContacts.value.length > 0) {
+                this.el.inputSearchContactsPlaceholder.hide()
+           }else{
+                this.el.inputSearchContactsPlaceholder.show()
+           }
+
+           this._user.getContact(this.el.inputSearchContacts.value);
+        });
+
+
         //event para mostrar panel de mudar o perfil
         this.el.myPhoto.on('click', e=>{
             this.closeAllLeftPane();
@@ -413,7 +436,9 @@ export class WhatsAppController{
             console.log(this.el.inputPhoto.files);
 
             [...this.el.inputPhoto.files].forEach(file => {
-                console.log(file);
+                
+                Message.sendImage(this._contactActive.chatId, this._user.email, file);
+                
             });
         });
 

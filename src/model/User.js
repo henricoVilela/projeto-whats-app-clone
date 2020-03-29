@@ -53,10 +53,10 @@ export class User extends Model{
         return User.getContactsRef(this.email).doc(btoa(contact.email)).set(contact.toJSON());
     }//addContact
 
-    getContact(){
+    getContact(filter = ''){
         return new Promise((resolve, reject)=>{
 
-            return User.getContactsRef(this.email).onSnapshot(docs=>{
+            return User.getContactsRef(this.email).where('name','>=',filter).onSnapshot(docs=>{
                 let contacts = [];
 
                 docs.forEach(doc=>{
